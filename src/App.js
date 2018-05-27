@@ -2,9 +2,10 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import logo from './logo.svg';
 import './App.css';
-import { Collection } from 'react-virtualized'
+import { Collection, AutoSizer } from 'react-virtualized'
 import 'react-virtualized/styles.css'; // only needs to be imported once
 
+const viewHeight = 500
 const numberOfItemsPerRow = 3
 const itemWidth = 300
 const itemHeight = 300
@@ -29,7 +30,7 @@ const list = [
 ];
 
 function cellRenderer ({ index, key, style }) {
-  let borderStyle = { border: '5px solid black' }
+  let borderStyle = { border: '1px solid black' }
 
   return (
     <div key={key} style={style}>
@@ -64,15 +65,25 @@ class App extends Component {
           To get started, edit <code>src/App.js</code> and save to reload.
         </p>
 
-        <div style={{ border: '30px solid green' }}>
-          <Collection
-            style={{ border: '30px solid blue' }}
-            cellCount={list.length}
-            cellRenderer={cellRenderer}
-            cellSizeAndPositionGetter={cellSizeAndPositionGetter}
-            height={2000}
-            width={2000}
-          />
+        <div style={{ border: '1px solid green' }}>
+
+
+          <AutoSizer >
+            {({height, width}) => {
+              console.log(`width: ${width}`);
+              console.log(`height: ${height}`);
+              return (
+                <Collection
+                  style={{ border: '1px solid blue' }}
+                  cellCount={list.length}
+                  cellRenderer={cellRenderer}
+                  cellSizeAndPositionGetter={cellSizeAndPositionGetter}
+                  height={viewHeight}
+                  width={width}
+                />
+                );
+              }}
+            </AutoSizer>
         </div>
       </div>
     );
