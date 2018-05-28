@@ -2,56 +2,11 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import logo from './logo.svg';
 import './App.css';
-import { Collection, AutoSizer } from 'react-virtualized'
-import 'react-virtualized/styles.css'; // only needs to be imported once
+import Gallery from 'react-photo-gallery';
+import request from 'superagent';
 
-const viewHeight = 500
-const numberOfItemsPerRow = 3
-const itemWidth = 300
-const itemHeight = 300
-const itemsPadding = 20
-
-// Collection data as an array of objects
-const list = [
-  { name: 'Brian Vaughn 1'},
-  { name: 'Brian Vaughn 2'},
-  { name: 'Brian Vaughn 3'},
-  { name: 'Brian Vaughn 4'},
-  { name: 'Brian Vaughn 5'},
-  { name: 'Brian Vaughn 6'},
-  { name: 'Brian Vaughn 11'},
-  { name: 'Brian Vaughn 22'},
-  { name: 'Brian Vaughn 33'},
-  { name: 'Brian Vaughn 44'},
-  { name: 'Brian Vaughn 55'},
-  { name: 'Brian Vaughn 66'}
-
-  // And so on...
-];
-
-function cellRenderer ({ index, key, style }) {
-  let borderStyle = { border: '1px solid black' }
-
-  return (
-    <div key={key} style={style}>
-      <p style={{ border: '1px solid black' }}>
-        {list[index].name}
-      </p>
-    </div>
-  )
-}
-
-function cellSizeAndPositionGetter ({ index }) {
-  const row = Math.floor(index / numberOfItemsPerRow)
-  const column = index % numberOfItemsPerRow
-
-  return {
-    width: itemWidth,
-    height: itemHeight,
-    x: itemsPadding + (itemsPadding+itemWidth)*column,
-    y: 2*itemsPadding*row,
-  }
-}
+var instagramPhotos = []
+var galleryPhotos = []
 
 class App extends Component {
   render() {
@@ -66,27 +21,37 @@ class App extends Component {
         </p>
 
         <div style={{ border: '1px solid green' }}>
-
-
-          <AutoSizer >
-            {({height, width}) => {
-              console.log(`width: ${width}`);
-              console.log(`height: ${height}`);
-              return (
-                <Collection
-                  style={{ border: '1px solid blue' }}
-                  cellCount={list.length}
-                  cellRenderer={cellRenderer}
-                  cellSizeAndPositionGetter={cellSizeAndPositionGetter}
-                  height={viewHeight}
-                  width={width}
-                />
-                );
-              }}
-            </AutoSizer>
+          <Gallery
+            photos = {galleryPhotos}
+            columns = '3'
+          />
         </div>
       </div>
     );
+  }
+
+  componentWillMount() {
+    this.fetchPhotos()
+  }
+
+  fetchPhotos() {
+    request
+      .get('https://api.instagram.com/v1/users/self/media/recent/?access_token=5595710377.1677ed0.c25766714d014a689bd34cadda11e520')
+      .then((res) => {
+        instagramPhotos = res.body.data
+        galleryPhotos = []
+
+        for (var i = 0; i <  Math.floor(instagramPhotos.length / 3) * 3; i++) {
+          galleryPhotos.push({
+            src: instagramPhotos[i].images.low_resolution.url,
+            width: 1,
+            height: 1
+          })
+        }
+
+        console.log(galleryPhotos)
+        this.forceUpdate()
+      })
   }
 }
 
