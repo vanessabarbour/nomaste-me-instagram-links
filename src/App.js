@@ -7,6 +7,7 @@ var initialWindowSize = 0
 const photoResolutionThreshold = 1000
 
 const numberOfColumns = 3
+const photosMargin = 1
 
 var instagramPhotos = []
 var galleryPhotos = []
@@ -43,6 +44,7 @@ class App extends Component {
         <Gallery
           photos = {galleryPhotos}
           columns = {numberOfColumns}
+          margin = {photosMargin}
           onClick = {photoSelected}
           ImageComponent = {getImageComponent}
         />
