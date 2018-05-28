@@ -12,6 +12,7 @@ var instagramPhotos = []
 var galleryPhotos = []
 
 function photoSelected(event, info) {
+  // console.log(info)
   let instagramPhoto = instagramPhotos[info.index]
   let caption = instagramPhoto.caption.text
   let linkIndex = caption.indexOf("bit.ly")
@@ -19,7 +20,20 @@ function photoSelected(event, info) {
     let link = caption.substring(linkIndex, caption.length)
     window.location.href = "https://" + link
   }
-};
+}
+
+function getImageComponent({ index, onClick, photo, margin}) {
+  const imgWithClick = { cursor: 'pointer' };
+  const imgStyle = { display: 'block', float: 'left', margin: margin, 'object-fit': 'cover' };
+
+  return (
+    <img
+        style={onClick ? { ...imgStyle, ...imgWithClick } : imgStyle}
+        {...photo}
+        onClick={(e) => photoSelected(e, {index, photo})}
+      />
+  )
+}
 
 class App extends Component {
   render() {
@@ -33,11 +47,12 @@ class App extends Component {
           To get started, edit <code>src/App.js</code> and save to reload.
         </p>
 
-        <div style={{ border: '1px solid green' }}>
+        <div style={{ border: '1px solid green'}}>
           <Gallery
             photos = {galleryPhotos}
             columns = '3'
             onClick = {photoSelected}
+            ImageComponent = {getImageComponent}
           />
         </div>
       </div>
