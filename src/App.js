@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
-import logo from './logo.svg';
 import './App.css';
 import Gallery from 'react-photo-gallery';
 import request from 'superagent';
 
 var initialWindowSize = 0
 const photoResolutionThreshold = 1000
+
+const numberOfColumns = 3
 
 var instagramPhotos = []
 var galleryPhotos = []
@@ -16,7 +16,7 @@ function photoSelected(event, info) {
   let instagramPhoto = instagramPhotos[info.index]
   let caption = instagramPhoto.caption.text
   let linkIndex = caption.indexOf("bit.ly")
-  if (linkIndex != -1) {
+  if (linkIndex !== -1) {
     let link = caption.substring(linkIndex, caption.length)
     window.location.href = "https://" + link
   }
@@ -31,6 +31,7 @@ function getImageComponent({ index, onClick, photo, margin}) {
         style={onClick ? { ...imgStyle, ...imgWithClick } : imgStyle}
         {...photo}
         onClick={(e) => photoSelected(e, {index, photo})}
+        alt="Failed to load"
       />
   )
 }
@@ -41,7 +42,7 @@ class App extends Component {
       <div className="App">
         <Gallery
           photos = {galleryPhotos}
-          columns = '3'
+          columns = {numberOfColumns}
           onClick = {photoSelected}
           ImageComponent = {getImageComponent}
         />
