@@ -5,8 +5,21 @@ import './App.css';
 import Gallery from 'react-photo-gallery';
 import request from 'superagent';
 
+var initialWindowSize = 0
+const photoResolutionThreshold = 1000
+
 var instagramPhotos = []
 var galleryPhotos = []
+
+function photoSelected(event, info) {
+  let instagramPhoto = instagramPhotos[info.index]
+  let caption = instagramPhoto.caption.text
+  let linkIndex = caption.indexOf("bit.ly")
+  if (linkIndex != -1) {
+    let link = caption.substring(linkIndex, caption.length)
+    window.location.href = "https://" + link
+  }
+};
 
 class App extends Component {
   render() {
@@ -24,6 +37,7 @@ class App extends Component {
           <Gallery
             photos = {galleryPhotos}
             columns = '3'
+            onClick = {photoSelected}
           />
         </div>
       </div>
@@ -31,6 +45,7 @@ class App extends Component {
   }
 
   componentWillMount() {
+    initialWindowSize = window.innerWidth
     this.fetchPhotos()
   }
 
@@ -42,14 +57,22 @@ class App extends Component {
         galleryPhotos = []
 
         for (var i = 0; i <  Math.floor(instagramPhotos.length / 3) * 3; i++) {
-          galleryPhotos.push({
-            src: instagramPhotos[i].images.low_resolution.url,
-            width: 1,
-            height: 1
-          })
+          if (initialWindowSize > photoResolutionThreshold) {
+            galleryPhotos.push({
+              src: instagramPhotos[i].images.standard_resolution.url,
+              width: 1,
+              height: 1
+            })
+          }
+          else {
+            galleryPhotos.push({
+              src: instagramPhotos[i].images.low_resolution.url,
+              width: 1,
+              height: 1
+            })
+          }
         }
 
-        console.log(galleryPhotos)
         this.forceUpdate()
       })
   }
