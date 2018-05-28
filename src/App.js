@@ -24,7 +24,7 @@ function photoSelected(event, info) {
 
 function getImageComponent({ index, onClick, photo, margin}) {
   const imgWithClick = { cursor: 'pointer' };
-  const imgStyle = { display: 'block', float: 'left', margin: margin, 'object-fit': 'cover' };
+  const imgStyle = { display: 'block', float: 'left', margin: margin, objectFit: 'cover' };
 
   return (
     <img
