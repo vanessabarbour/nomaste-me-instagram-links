@@ -6,7 +6,7 @@ import request from 'superagent';
 var initialWindowSize = 0
 const photoResolutionThreshold = 1000
 
-const numberOfColumns = 3
+const numberOfColumns = 2
 const photosMargin = 1
 
 var instagramPhotos = []
