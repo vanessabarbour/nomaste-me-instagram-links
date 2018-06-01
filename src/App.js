@@ -6,11 +6,14 @@ import request from 'superagent';
 var initialWindowSize = 0
 const photoResolutionThreshold = 1000
 
+const minimumNumberOfPhotos = 10
 const numberOfColumns = 2
 const photosMargin = 1
 
-var instagramPhotos = []
+var recipePosts = []
 var galleryPhotos = []
+
+var instagramAccessToken = "5595710377.1677ed0.c25766714d014a689bd34cadda11e520"
 
 function recipeLink(instagramPost) {
   let caption = instagramPost.caption.text
@@ -23,7 +26,7 @@ function recipeLink(instagramPost) {
 }
 
 function photoSelected(event, info) {
-  window.location.href = instagramPhotos[info.index].recipe_link
+  window.location.href = recipePosts[info.index].recipe_link
 }
 
 function getImageComponent({ index, onClick, photo, margin}) {
@@ -61,38 +64,69 @@ class App extends Component {
   }
 
   fetchPhotos() {
-    request
-      .get('https://api.instagram.com/v1/users/self/media/recent/?access_token=5595710377.1677ed0.c25766714d014a689bd34cadda11e520')
+    request.get("https://api.instagram.com/v1/users/self/media/recent/?access_token=" + instagramAccessToken)
       .then((res) => {
-        var i = 0
-
-        instagramPhotos = res.body.data
-        for (i = 0; i < instagramPhotos.length; i++) {
-          let link = recipeLink(instagramPhotos[i])
-          instagramPhotos[i].recipe_link = link
-        }
-        instagramPhotos = instagramPhotos.filter((elem, index, arr) => elem.recipe_link != null)
-
         galleryPhotos = []
-        for (i = 0; i < Math.floor(instagramPhotos.length / numberOfColumns) * numberOfColumns; i++) {
-          if (initialWindowSize > photoResolutionThreshold) {
-            galleryPhotos.push({
-              src: instagramPhotos[i].images.standard_resolution.url,
-              width: 1,
-              height: 1
-            })
-          }
-          else {
-            galleryPhotos.push({
-              src: instagramPhotos[i].images.low_resolution.url,
-              width: 1,
-              height: 1
-            })
-          }
-        }
 
-        this.forceUpdate()
+        recipePosts = this.filterInstagramResultsToRecipes(res)
+        this.addPosts(recipePosts)
+        this.fetchMorePhotosIfNeeded(res.body.pagination.next_url)
+
       })
+  }
+
+  fetchMorePhotosIfNeeded(nextURL) {
+    if (nextURL == null || recipePosts.length >= minimumNumberOfPhotos) {
+      this.removeExtras()
+      this.forceUpdate()
+      return
+    }
+
+    request.get(nextURL)
+      .then((res) => {
+        let nextRecipePosts = this.filterInstagramResultsToRecipes(res)
+        this.addPosts(nextRecipePosts)
+        recipePosts = recipePosts.concat(nextRecipePosts)
+        this.fetchMorePhotosIfNeeded(res.body.pagination.next_url)
+      })
+  }
+
+  removeExtras() {
+    while (recipePosts.length % numberOfColumns != 0) {
+      recipePosts.pop()
+      galleryPhotos.pop()
+    }
+  }
+
+  filterInstagramResultsToRecipes(res) {
+    var posts = res.body.data
+    for (var i = 0; i < posts.length; i++) {
+      let link = recipeLink(posts[i])
+      posts[i].recipe_link = link
+    }
+    return posts.filter((elem, index, arr) => elem.recipe_link != null)
+  }
+
+
+  addPosts(posts) {
+    for (var i = 0; i < posts.length; i++) {
+      if (initialWindowSize > photoResolutionThreshold) {
+        galleryPhotos.push({
+          src: posts[i].images.standard_resolution.url,
+          width: 1,
+          height: 1
+        })
+      }
+      else {
+        galleryPhotos.push({
+          src: posts[i].images.low_resolution.url,
+          width: 1,
+          height: 1
+        })
+      }
+    }
+
+    this.forceUpdate()
   }
 }
 
