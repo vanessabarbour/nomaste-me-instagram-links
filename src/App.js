@@ -12,15 +12,18 @@ const photosMargin = 1
 var instagramPhotos = []
 var galleryPhotos = []
 
-function photoSelected(event, info) {
-  // console.log(info)
-  let instagramPhoto = instagramPhotos[info.index]
-  let caption = instagramPhoto.caption.text
+function recipeLink(instagramPost) {
+  let caption = instagramPost.caption.text
   let linkIndex = caption.indexOf("bit.ly")
-  if (linkIndex !== -1) {
-    let link = caption.substring(linkIndex, caption.length)
-    window.location.href = "https://" + link
+  if (linkIndex === -1) {
+    return null
   }
+
+  return "https://" + caption.substring(linkIndex, caption.length)
+}
+
+function photoSelected(event, info) {
+  window.location.href = instagramPhotos[info.index].recipe_link
 }
 
 function getImageComponent({ index, onClick, photo, margin}) {
@@ -61,10 +64,17 @@ class App extends Component {
     request
       .get('https://api.instagram.com/v1/users/self/media/recent/?access_token=5595710377.1677ed0.c25766714d014a689bd34cadda11e520')
       .then((res) => {
-        instagramPhotos = res.body.data
-        galleryPhotos = []
+        var i = 0
 
-        for (var i = 0; i <  Math.floor(instagramPhotos.length / 3) * 3; i++) {
+        instagramPhotos = res.body.data
+        for (i = 0; i < instagramPhotos.length; i++) {
+          let link = recipeLink(instagramPhotos[i])
+          instagramPhotos[i].recipe_link = link
+        }
+        instagramPhotos = instagramPhotos.filter((elem, index, arr) => elem.recipe_link != null)
+
+        galleryPhotos = []
+        for (i = 0; i < Math.floor(instagramPhotos.length / numberOfColumns) * numberOfColumns; i++) {
           if (initialWindowSize > photoResolutionThreshold) {
             galleryPhotos.push({
               src: instagramPhotos[i].images.standard_resolution.url,
