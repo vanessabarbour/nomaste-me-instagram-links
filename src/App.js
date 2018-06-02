@@ -26,7 +26,7 @@ function recipeLink(instagramPost) {
 }
 
 function photoSelected(event, info) {
-  window.location.href = recipePosts[info.index].recipe_link
+  window.open(recipePosts[info.index].recipe_link)
 }
 
 function getImageComponent({ index, onClick, photo, margin}) {
@@ -92,7 +92,7 @@ class App extends Component {
   }
 
   removeExtras() {
-    while (recipePosts.length % numberOfColumns != 0) {
+    while (recipePosts.length % numberOfColumns !== 0) {
       recipePosts.pop()
       galleryPhotos.pop()
     }
